@@ -1,10 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using SteamMods.Cli;
+using SteamMods.Core.Configuration;
 
 Console.WriteLine("Hello, World!");
 
-var path = @"C:\Users\Mathia\source\repos\SteamMods\DefaultEngine.ini";
+var path = @"D:\SteamLibrary\steamapps\common\XCOM 2\XCom2-WarOfTheChosen\XComGame\Config\DefaultEngine.ini";
 
 var reader = new IniFileReader();
 var result = await reader.Read(path);

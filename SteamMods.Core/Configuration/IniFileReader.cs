@@ -6,8 +6,86 @@ public class IniFileReader
 {
     private readonly Regex _sectionHeaderRegex = new(@"^\[(?<NAME>.*)\]$");
     private readonly Regex _keyValuePairRegex = new(@"(?<KEY>.*)=(?<VALUE>.*)");
+    private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)=(?<KEY>.*)");
 
-    public async Task<IniFile> Read(string path)
+    public async Task<IniFile?> Read(string path)
+    {
+        var gameDirectoryLocator = new GameDirectoryLocator();
+        var baseDirectory = gameDirectoryLocator.GetBaseGameDirectory(268500);
+        if (baseDirectory == null)
+        {
+            return null;
+        }
+
+        var iniFilePath = Path.Combine(baseDirectory, path);
+        var sections = await ReadSectionsFromFile(iniFilePath);
+
+        if (sections.ContainsKey(Keys.Sections.Configuration) && sections[Keys.Sections.Configuration].ContainsKey(Keys.Values.BasedOn))
+        {
+            var baseIniFilePath = Path.Combine(baseDirectory, sections[Keys.Sections.Configuration][Keys.Values.BasedOn].Single());
+            var baseSections = await ReadSectionsFromFile(baseIniFilePath);
+
+            sections = CombineSections(baseSections, sections);
+        }
+
+        return new IniFile
+        {
+            Sections = sections
+        };
+    }
+
+    private Dictionary<string,Dictionary<string,List<string>>> CombineSections(Dictionary<string,Dictionary<string,List<string>>> baseSections, Dictionary<string,Dictionary<string,List<string>>> sections)
+    {
+        foreach (var section in sections.Keys)
+        {
+            foreach (var key in sections[section].Keys)
+            {
+                if (section == Keys.Sections.Configuration && key == Keys.Values.BasedOn)
+                {
+                    continue;
+                }
+
+                var keyModificationMatch = _keyModificationRegex.Match(key);
+                if (!keyModificationMatch.Success)
+                {
+                    continue;
+                }
+
+                void EnsureSection(string newSection)
+                {
+                    if (!baseSections.ContainsKey(newSection))
+                    {
+                        baseSections.Add(newSection, new Dictionary<string, List<string>>());
+                    }
+                }
+
+                void EnsureKey(string newSection, string newKey)
+                {
+                    if (!baseSections[newSection].ContainsKey(newKey))
+                    {
+                        baseSections[newSection].Add(newKey, new List<string>());
+                    }
+                }
+
+                switch (keyModificationMatch.Groups["OPERATION"].Value)
+                {
+                    case "+":
+                    case ".":
+                        var newKey = keyModificationMatch.Groups["KEY"].Value;
+
+                        EnsureSection(section);
+                        EnsureKey(section, newKey);
+                        
+                        baseSections[section][newKey].AddRange(sections[section][key]);
+                        break;
+                }
+            }
+        }
+
+        return sections;
+    }
+
+    private async Task<Dictionary<string, Dictionary<string, List<string>>>> ReadSectionsFromFile(string path)
     {
         var sections = new Dictionary<string, Dictionary<string, List<string>>>();
 
@@ -46,10 +124,7 @@ public class IniFileReader
             sections.Add("unknown", unknownSection);
         }
 
-        return new IniFile
-        {
-            Sections = sections
-        };
+        return sections;
     }
 
     private static async Task ProcessKeyValuePair(Match keyValuePairMatch, StreamReader reader, Dictionary<string, List<string>> currentSection)

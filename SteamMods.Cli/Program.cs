@@ -2,9 +2,9 @@
 
 using SteamMods.Core.Configuration;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Hello, XCOM 2!");
 
-var path = @"D:\SteamLibrary\steamapps\common\XCOM 2\XCom2-WarOfTheChosen\XComGame\Config\DefaultEngine.ini";
+var path = @"Config\DefaultEngine.ini";
 
 var reader = new IniFileReader();
 var result = await reader.Read(path);

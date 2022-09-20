@@ -6,7 +6,7 @@ public class IniFileReader
 {
     private readonly Regex _sectionHeaderRegex = new(@"^\[(?<NAME>.*)\]$");
     private readonly Regex _keyValuePairRegex = new(@"(?<KEY>.*)=(?<VALUE>.*)");
-    private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)=(?<KEY>.*)");
+    private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)(?<KEY>.*)");
 
     public async Task<IniFile?> Read(string path)
     {
@@ -67,22 +67,43 @@ public class IniFileReader
                     }
                 }
 
+                var newKey = keyModificationMatch.Groups["KEY"].Value;
                 switch (keyModificationMatch.Groups["OPERATION"].Value)
                 {
                     case "+":
                     case ".":
-                        var newKey = keyModificationMatch.Groups["KEY"].Value;
-
                         EnsureSection(section);
                         EnsureKey(section, newKey);
                         
                         baseSections[section][newKey].AddRange(sections[section][key]);
                         break;
+                    
+                    case "-":
+                        if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey))
+                        {
+                            baseSections[section][newKey].RemoveAll(x => sections[section][key].Contains(x));
+                        }
+                        break;
+                    
+                    case "!":
+                        if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey))
+                        {
+                            baseSections[section][newKey].Clear();
+                        }
+                        break;
+                    case ";":
+                        break;
+                    default:
+                        EnsureSection(section);
+                        EnsureKey(section, newKey);
+
+                        baseSections[section][newKey] = sections[section][key];
+                        break;
                 }
             }
         }
 
-        return sections;
+        return baseSections;
     }
 
     private async Task<Dictionary<string, Dictionary<string, List<string>>>> ReadSectionsFromFile(string path)

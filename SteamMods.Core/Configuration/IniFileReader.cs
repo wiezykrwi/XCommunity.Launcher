@@ -7,22 +7,23 @@ public class IniFileReader
     private readonly Regex _sectionHeaderRegex = new(@"^\[(?<NAME>.*)\]$");
     private readonly Regex _keyValuePairRegex = new(@"(?<KEY>.*)=(?<VALUE>.*)");
     private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)(?<KEY>.*)");
+    private readonly GameDirectoryLocator _gameDirectoryLocator;
+
+    public IniFileReader(GameDirectoryLocator gameDirectoryLocator)
+    {
+        _gameDirectoryLocator = gameDirectoryLocator;
+    }
 
     public async Task<IniFile?> Read(string path)
     {
-        var gameDirectoryLocator = new GameDirectoryLocator();
-        var baseDirectory = gameDirectoryLocator.GetBaseGameDirectory(268500);
-        if (baseDirectory == null)
-        {
-            return null;
-        }
-
-        var iniFilePath = Path.Combine(baseDirectory, path);
+        var iniFilePath = _gameDirectoryLocator.GetDefaultConfigLocation(path);
         var sections = await ReadSectionsFromFile(iniFilePath);
 
-        if (sections.ContainsKey(Keys.Sections.Configuration) && sections[Keys.Sections.Configuration].ContainsKey(Keys.Values.BasedOn))
+        if (sections.ContainsKey(Constants.Sections.Configuration) && sections[Constants.Sections.Configuration].ContainsKey(Constants.Values.BasedOn))
         {
-            var baseIniFilePath = Path.Combine(baseDirectory, sections[Keys.Sections.Configuration][Keys.Values.BasedOn].Single());
+            var baseDirectory = _gameDirectoryLocator.GetBaseGameDirectory();
+            var basedOnFile = sections[Constants.Sections.Configuration][Constants.Values.BasedOn].Single();
+            var baseIniFilePath = Path.Combine(baseDirectory, basedOnFile);
             var baseSections = await ReadSectionsFromFile(baseIniFilePath);
 
             sections = CombineSections(baseSections, sections);
@@ -40,7 +41,7 @@ public class IniFileReader
         {
             foreach (var key in sections[section].Keys)
             {
-                if (section == Keys.Sections.Configuration && key == Keys.Values.BasedOn)
+                if (section == Constants.Sections.Configuration && key == Constants.Values.BasedOn)
                 {
                     continue;
                 }

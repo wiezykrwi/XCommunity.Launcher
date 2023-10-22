@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Cli", "SteamMods.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Core", "SteamMods.Core\SteamMods.Core.csproj", "{BBB07BC5-0426-4A6A-B1B7-F885AC974509}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Gui", "SteamMods.Gui\SteamMods.Gui.csproj", "{3ADD981D-60F1-4E64-AD65-769C5ED74645}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BBB07BC5-0426-4A6A-B1B7-F885AC974509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBB07BC5-0426-4A6A-B1B7-F885AC974509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBB07BC5-0426-4A6A-B1B7-F885AC974509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ADD981D-60F1-4E64-AD65-769C5ED74645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ADD981D-60F1-4E64-AD65-769C5ED74645}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ADD981D-60F1-4E64-AD65-769C5ED74645}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ADD981D-60F1-4E64-AD65-769C5ED74645}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

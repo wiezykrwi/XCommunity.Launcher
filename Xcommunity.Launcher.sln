@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Cli", "SteamMods.Cli\SteamMods.Cli.csproj", "{A23FD47A-48EB-4B38-B6F4-67B13DD448C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xcommunity.Launcher.Cli", "Xcommunity.Launcher.Cli\Xcommunity.Launcher.Cli.csproj", "{A23FD47A-48EB-4B38-B6F4-67B13DD448C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Core", "SteamMods.Core\SteamMods.Core.csproj", "{BBB07BC5-0426-4A6A-B1B7-F885AC974509}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xcommunity.Launcher.Core", "Xcommunity.Launcher.Core\Xcommunity.Launcher.Core.csproj", "{BBB07BC5-0426-4A6A-B1B7-F885AC974509}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamMods.Gui", "SteamMods.Gui\SteamMods.Gui.csproj", "{3ADD981D-60F1-4E64-AD65-769C5ED74645}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xcommunity.Launcher.Gui", "Xcommunity.Launcher.Gui\Xcommunity.Launcher.Gui.csproj", "{3ADD981D-60F1-4E64-AD65-769C5ED74645}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

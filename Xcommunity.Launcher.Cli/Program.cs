@@ -1,4 +1,4 @@
-﻿using SteamMods.Core;
+﻿using Xcommunity.Launcher.Core;
 
 var modFinder = new ModFinder();
 var mods = await modFinder.FindModsAsync();

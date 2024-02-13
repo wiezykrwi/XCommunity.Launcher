@@ -1,35 +1,38 @@
 ﻿using System.Text.RegularExpressions;
-using SteamMods.Core.Configuration;
+using Xcommunity.Launcher.Core.Configuration;
 
-namespace SteamMods.Core;
+namespace Xcommunity.Launcher.Core;
 
 public class ModFinder
 {
-    private readonly IniFileReader _reader;
     private readonly GameDirectoryLocator _gameDirectoryLocator;
-    private readonly Regex _titleRegex = new Regex(@"^Title=(?<TITLE>.*)$");
+    private readonly IniFileReader _reader;
+    private readonly Regex _titleRegex = new(@"^Title=(?<TITLE>.*)$");
 
     public ModFinder()
     {
         _gameDirectoryLocator = new GameDirectoryLocator();
         _reader = new IniFileReader(_gameDirectoryLocator);
     }
-    
+
     public async Task<IReadOnlyCollection<ModData>> FindModsAsync()
     {
-        var modDirs = await GetModDirectories();
+        var modDirectories = await GetModDirectories();
+        var modDirs = modDirectories.Select(x => new DirectoryInfo(x));
 
         var modDataList = new List<ModData>();
 
-        foreach (var modDirectory in modDirs.Where(Directory.Exists).SelectMany(Directory.GetDirectories))
+        foreach (var modDirectory in modDirs.Where(x => x.Exists).SelectMany(x => x.GetDirectories()))
         {
-            var modDataFile = Directory.GetFiles(modDirectory, "*.xcommod").SingleOrDefault();
-            if (modDataFile is null)
+            var modDataFile = modDirectory.GetFiles("*.xcommod").SingleOrDefault();
+            if (modDataFile is null) continue;
+
+            if (!ulong.TryParse(modDirectory.Name, out var modId))
             {
                 continue;
             }
 
-            await using var fileStream = File.OpenRead(modDataFile);
+            await using var fileStream = File.OpenRead(modDataFile.FullName);
             using var streamReader = new StreamReader(fileStream);
             while (!streamReader.EndOfStream)
             {
@@ -39,14 +42,15 @@ public class ModFinder
                 if (!match.Success) continue;
                 modDataList.Add(new ModData
                 {
+                    Id = modId,
                     Title = match.Groups["TITLE"].Value,
-                    Location = modDirectory
+                    Location = modDirectory.FullName
                 });
 
                 break;
             }
         }
-        
+
         return modDataList;
     }
 

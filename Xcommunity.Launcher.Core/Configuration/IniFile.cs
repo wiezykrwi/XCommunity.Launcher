@@ -1,4 +1,4 @@
-﻿namespace SteamMods.Core.Configuration;
+﻿namespace Xcommunity.Launcher.Core.Configuration;
 
 public class IniFile
 {
@@ -11,10 +11,7 @@ public class IniFile
 
     public IReadOnlyCollection<string> GetValues(string section, string key)
     {
-        if (!HasValue(section, key))
-        {
-            throw new ArgumentException($"No values present for {section}, {key}");
-        }
+        if (!HasValue(section, key)) throw new ArgumentException($"No values present for {section}, {key}");
 
         return Sections[section][key];
     }

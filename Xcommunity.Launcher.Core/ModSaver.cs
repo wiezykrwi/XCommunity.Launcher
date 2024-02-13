@@ -1,6 +1,6 @@
-﻿using SteamMods.Core.Configuration;
+﻿using Xcommunity.Launcher.Core.Configuration;
 
-namespace SteamMods.Core;
+namespace Xcommunity.Launcher.Core;
 
 public class ModSaver
 {
@@ -14,10 +14,7 @@ public class ModSaver
         var modOptions = CreateModOptions();
 
         var activeMods = modOptions.Sections[Constants.Sections.ModOptions.XComModOptions][Constants.Values.ActiveMods];
-        foreach (var mod in mods)
-        {
-            activeMods.Add(mod.Title);
-        }
+        foreach (var mod in mods) activeMods.Add(mod.Title);
 
         await modOptionsFileWriter.WriteAsync(modOptions, timestamp);
     }
@@ -31,7 +28,7 @@ public class ModSaver
                 {
                     Constants.Sections.ModOptions.XComModOptions, new Dictionary<string, List<string>>
                     {
-                        { Constants.Values.ActiveMods , new List<string>() }
+                        { Constants.Values.ActiveMods, new List<string>() }
                     }
                 }
             }

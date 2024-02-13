@@ -1,13 +1,13 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace SteamMods.Core.Configuration;
+namespace Xcommunity.Launcher.Core.Configuration;
 
 public class IniFileReader
 {
-    private readonly Regex _sectionHeaderRegex = new(@"^\[(?<NAME>.*)\]$");
-    private readonly Regex _keyValuePairRegex = new(@"(?<KEY>.*)=(?<VALUE>.*)");
-    private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)(?<KEY>.*)");
     private readonly GameDirectoryLocator _gameDirectoryLocator;
+    private readonly Regex _keyModificationRegex = new(@"(?<OPERATION>.)(?<KEY>.*)");
+    private readonly Regex _keyValuePairRegex = new(@"(?<KEY>.*)=(?<VALUE>.*)");
+    private readonly Regex _sectionHeaderRegex = new(@"^\[(?<NAME>.*)\]$");
 
     public IniFileReader(GameDirectoryLocator gameDirectoryLocator)
     {
@@ -35,72 +35,54 @@ public class IniFileReader
         };
     }
 
-    private Dictionary<string,Dictionary<string,List<string>>> CombineSections(Dictionary<string,Dictionary<string,List<string>>> baseSections, Dictionary<string,Dictionary<string,List<string>>> sections)
+    private Dictionary<string, Dictionary<string, List<string>>> CombineSections(Dictionary<string, Dictionary<string, List<string>>> baseSections,
+        Dictionary<string, Dictionary<string, List<string>>> sections)
     {
         foreach (var section in sections.Keys)
+        foreach (var key in sections[section].Keys)
         {
-            foreach (var key in sections[section].Keys)
+            if (section == Constants.Sections.Configuration && key == Constants.Values.BasedOn) continue;
+
+            var keyModificationMatch = _keyModificationRegex.Match(key);
+            if (!keyModificationMatch.Success) continue;
+
+            void EnsureSection(string newSection)
             {
-                if (section == Constants.Sections.Configuration && key == Constants.Values.BasedOn)
-                {
-                    continue;
-                }
+                if (!baseSections.ContainsKey(newSection)) baseSections.Add(newSection, new Dictionary<string, List<string>>());
+            }
 
-                var keyModificationMatch = _keyModificationRegex.Match(key);
-                if (!keyModificationMatch.Success)
-                {
-                    continue;
-                }
+            void EnsureKey(string newSection, string newKey)
+            {
+                if (!baseSections[newSection].ContainsKey(newKey)) baseSections[newSection].Add(newKey, new List<string>());
+            }
 
-                void EnsureSection(string newSection)
-                {
-                    if (!baseSections.ContainsKey(newSection))
-                    {
-                        baseSections.Add(newSection, new Dictionary<string, List<string>>());
-                    }
-                }
+            var newKey = keyModificationMatch.Groups["KEY"].Value;
+            switch (keyModificationMatch.Groups["OPERATION"].Value)
+            {
+                case "+":
+                case ".":
+                    EnsureSection(section);
+                    EnsureKey(section, newKey);
 
-                void EnsureKey(string newSection, string newKey)
-                {
-                    if (!baseSections[newSection].ContainsKey(newKey))
-                    {
-                        baseSections[newSection].Add(newKey, new List<string>());
-                    }
-                }
+                    baseSections[section][newKey].AddRange(sections[section][key]);
+                    break;
 
-                var newKey = keyModificationMatch.Groups["KEY"].Value;
-                switch (keyModificationMatch.Groups["OPERATION"].Value)
-                {
-                    case "+":
-                    case ".":
-                        EnsureSection(section);
-                        EnsureKey(section, newKey);
-                        
-                        baseSections[section][newKey].AddRange(sections[section][key]);
-                        break;
-                    
-                    case "-":
-                        if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey))
-                        {
-                            baseSections[section][newKey].RemoveAll(x => sections[section][key].Contains(x));
-                        }
-                        break;
-                    
-                    case "!":
-                        if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey))
-                        {
-                            baseSections[section][newKey].Clear();
-                        }
-                        break;
-                    case ";":
-                        break;
-                    default:
-                        EnsureSection(section);
-                        EnsureKey(section, newKey);
+                case "-":
+                    if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey))
+                        baseSections[section][newKey].RemoveAll(x => sections[section][key].Contains(x));
+                    break;
 
-                        baseSections[section][newKey] = sections[section][key];
-                        break;
-                }
+                case "!":
+                    if (baseSections.ContainsKey(section) && baseSections[section].ContainsKey(newKey)) baseSections[section][newKey].Clear();
+                    break;
+                case ";":
+                    break;
+                default:
+                    EnsureSection(section);
+                    EnsureKey(section, newKey);
+
+                    baseSections[section][newKey] = sections[section][key];
+                    break;
             }
         }
 
@@ -133,18 +115,12 @@ public class IniFileReader
             }
 
             var keyValuePairMatch = _keyValuePairRegex.Match(line);
-            if (!keyValuePairMatch.Success)
-            {
-                continue;
-            }
+            if (!keyValuePairMatch.Success) continue;
 
             await ProcessKeyValuePair(keyValuePairMatch, reader, currentSection);
         }
 
-        if (unknownSection.Count > 0)
-        {
-            sections.Add("unknown", unknownSection);
-        }
+        if (unknownSection.Count > 0) sections.Add("unknown", unknownSection);
 
         return sections;
     }
@@ -155,19 +131,14 @@ public class IniFileReader
         var currentValue = keyValuePairMatch.Groups["VALUE"].Value;
 
         while (currentValue.Length > 2 && currentValue.Substring(currentValue.Length - 2) == "\\\\")
-        {
             currentValue = currentValue.Substring(0, currentValue.Length - 2) + "\n" + await reader.ReadLineAsync();
-        }
 
         AddToSection(currentSection, currentKey, currentValue);
     }
 
     private static Dictionary<string, List<string>> AddNewSection(Dictionary<string, Dictionary<string, List<string>>> sections, string sectionHeaderName)
     {
-        if (sections.ContainsKey(sectionHeaderName))
-        {
-            return sections[sectionHeaderName];
-        }
+        if (sections.ContainsKey(sectionHeaderName)) return sections[sectionHeaderName];
 
         var currentSection = new Dictionary<string, List<string>>();
         sections.Add(sectionHeaderName, currentSection);
@@ -178,15 +149,11 @@ public class IniFileReader
     private static void AddToSection(Dictionary<string, List<string>> currentSection, string currentKey, string currentValue)
     {
         if (!currentSection.ContainsKey(currentKey))
-        {
             currentSection.Add(currentKey, new List<string>
             {
                 currentValue.TrimStart()
             });
-        }
         else
-        {
             currentSection[currentKey].Add(currentValue);
-        }
     }
 }

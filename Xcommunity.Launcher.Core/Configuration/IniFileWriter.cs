@@ -1,4 +1,4 @@
-﻿namespace SteamMods.Core.Configuration;
+﻿namespace Xcommunity.Launcher.Core.Configuration;
 
 public class IniFileWriter
 {
@@ -20,10 +20,7 @@ public class IniFileWriter
         foreach (var section in iniFile.Sections)
         {
             await writer.WriteLineAsync($"[{section.Key}]");
-            foreach (var entry in section.Value.SelectMany(x => x.Value, (x, y) => $"{x.Key}={y}"))
-            {
-                await writer.WriteLineAsync(entry);
-            }
+            foreach (var entry in section.Value.SelectMany(x => x.Value, (x, y) => $"{x.Key}={y}")) await writer.WriteLineAsync(entry);
 
             await writer.WriteLineAsync();
         }
@@ -32,27 +29,16 @@ public class IniFileWriter
     private void EnsureDirectoryExists()
     {
         var fileInfo = new FileInfo(_path);
-        if (fileInfo.Directory == null)
-        {
-            throw new Exception("Could not determine target config folder");
-        }
+        if (fileInfo.Directory == null) throw new Exception("Could not determine target config folder");
 
-        if (!fileInfo.Directory.Exists)
-        {
-            fileInfo.Directory.Create();
-        }
+        if (!fileInfo.Directory.Exists) fileInfo.Directory.Create();
     }
 
     private static void SetIniVersion(IniFile iniFile, DateTime timestamp)
     {
         if (!iniFile.Sections.ContainsKey(Constants.Sections.IniVersion))
-        {
             iniFile.Sections.Add(Constants.Sections.IniVersion, new Dictionary<string, List<string>>());
-        }
-        else if (iniFile.Sections[Constants.Sections.IniVersion].Any())
-        {
-            iniFile.Sections[Constants.Sections.IniVersion].Clear();
-        }
+        else if (iniFile.Sections[Constants.Sections.IniVersion].Any()) iniFile.Sections[Constants.Sections.IniVersion].Clear();
 
         iniFile.Sections[Constants.Sections.IniVersion].Add("0", new List<string>
         {

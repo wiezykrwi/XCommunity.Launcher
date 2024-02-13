@@ -1,4 +1,4 @@
-﻿namespace SteamMods.Core.Configuration;
+﻿namespace Xcommunity.Launcher.Core.Configuration;
 
 public static class Constants
 {
@@ -12,7 +12,7 @@ public static class Constants
     {
         public const uint XCom2SteamId = 268500;
     }
-    
+
     public static class Sections
     {
         public const string Configuration = nameof(Configuration);

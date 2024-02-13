@@ -1,6 +1,6 @@
 ﻿using Steamworks;
 
-namespace SteamMods.Core.Configuration;
+namespace Xcommunity.Launcher.Core.Configuration;
 
 public class GameDirectoryLocator
 {
@@ -11,21 +11,15 @@ public class GameDirectoryLocator
     public string GetBaseGameDirectory()
     {
         var steamAppIdFile = "steam_appid.txt";
-        if (File.Exists(steamAppIdFile))
-        {
-            File.Delete(steamAppIdFile);
-        }
+        if (File.Exists(steamAppIdFile)) File.Delete(steamAppIdFile);
 
         var appId = Constants.Identifiers.XCom2SteamId;
         File.WriteAllText(steamAppIdFile, appId.ToString());
 
-        SteamAPI.Init();
-        
+        SteamApiWrapper.Init();
+
         var appInstallDirResult = SteamApps.GetAppInstallDir((AppId_t)appId, out var gameDirectory, 260);
-        if (appInstallDirResult <= 0)
-        {
-            throw new Exception("Could not locate steam app install folder");
-        }
+        if (appInstallDirResult <= 0) throw new Exception("Could not locate steam app install folder");
 
         return Path.Combine(gameDirectory, GameFolder);
     }

@@ -96,6 +96,7 @@
             </Button>
         </Grid>
 
+        <!-- MAIN -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="500" />
@@ -126,6 +127,7 @@
             <views:ModView Grid.Column="1" DataContext="{Binding SelectedMod}" />
         </Grid>
 
+        <!-- FOOTER -->
         <Grid Grid.Row="3" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120" />

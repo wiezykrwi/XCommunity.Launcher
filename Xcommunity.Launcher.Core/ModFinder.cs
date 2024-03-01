@@ -27,10 +27,7 @@ public class ModFinder
             var modDataFile = modDirectory.GetFiles("*.xcommod").SingleOrDefault();
             if (modDataFile is null) continue;
 
-            if (!ulong.TryParse(modDirectory.Name, out var modId))
-            {
-                continue;
-            }
+            if (!ulong.TryParse(modDirectory.Name, out var modId)) continue;
 
             await using var fileStream = File.OpenRead(modDataFile.FullName);
             using var streamReader = new StreamReader(fileStream);

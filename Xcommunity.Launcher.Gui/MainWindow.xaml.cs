@@ -10,6 +10,7 @@ public partial class MainWindow
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = ViewModelLocator.Instance.Main;
     }
 
     private void MinimizeButtonClicked(object sender, RoutedEventArgs e)
@@ -27,7 +28,7 @@ public partial class MainWindow
         {
             MessageBox.Show(exception.Message, "Error while saving mod metadata", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        
+
         Close();
     }
 

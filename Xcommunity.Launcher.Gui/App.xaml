@@ -1,10 +1,15 @@
 ﻿<Application x:Class="Xcommunity.Launcher.Gui.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:resources="clr-namespace:Xcommunity.Launcher.Gui.Resources"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <SolidColorBrush x:Key="HighlightBrush" Color="#9ACBCB" />
         <SolidColorBrush x:Key="AccentBrush" Color="#3D5661" />
+        
+        <resources:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+        <resources:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <resources:StateToViewModelConverter x:Key="StateToViewModelConverter" />
 
         <Style x:Key="TitleButton" TargetType="Button">
             <Setter Property="Width" Value="50" />
@@ -34,7 +39,9 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}"
+                        <Border Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
                                 CornerRadius="0 0 6 6">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -53,8 +60,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border x:Name="Border"
-                                CornerRadius="0 6 0 6"
+                        <Border CornerRadius="0 6 0 6"
                                 BorderThickness="2"
                                 Height="40" Width="40"
                                 BorderBrush="{StaticResource HighlightBrush}"

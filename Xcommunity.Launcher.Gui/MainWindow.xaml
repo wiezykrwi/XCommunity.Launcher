@@ -5,30 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa6="http://schemas.fontawesome.com/icons/svg"
         xmlns:viewModels="clr-namespace:Xcommunity.Launcher.Gui.ViewModels"
-        xmlns:resources="clr-namespace:Xcommunity.Launcher.Gui.Resources"
         xmlns:views="clr-namespace:Xcommunity.Launcher.Gui.Views"
+        xmlns:modals="clr-namespace:Xcommunity.Launcher.Gui.Views.Modals"
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="CanResizeWithGrip"
         AllowsTransparency="True"
         BorderThickness="0"
         Height="800" Width="1200"
+        DataContext="{Binding Source={x:Static viewModels:ViewModelLocator.Instance}, Path=Instance.Main}"
         MouseDown="MainWindow_OnMouseDown">
-
-    <Window.DataContext>
-        <viewModels:MainViewModel />
-    </Window.DataContext>
 
     <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="100" />
-            <RowDefinition Height="50" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="100" />
         </Grid.RowDefinitions>
 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
         <!-- HEADER -->
-        <Grid Grid.Row="0">
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -66,79 +66,76 @@
             </Button>
         </Grid>
 
-        <!-- FILTER -->
-        <Grid Grid.Row="1" Margin="7 0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="7" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="7" />
-                <ColumnDefinition Width="120" />
-            </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+            <StackPanel.Resources>
+                <Style x:Key="StateRadioButtonStyle" TargetType="RadioButton">
+                    <Setter Property="Width" Value="50" />
+                    <Setter Property="Height" Value="50" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="RadioButton">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        CornerRadius="0 0 6 6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
 
-            <ToggleButton
-                Style="{StaticResource ToggleButtonStyle}"
-                Command="{Binding ToggleAllCommand}"
-                IsChecked="{Binding AreAllEnabled, Mode=OneWay}" />
-            <TextBox
-                Grid.Column="2"
-                Style="{StaticResource TextBoxStyle}"
+                    <Style.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HighlightBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource HighlightBrush}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style x:Key="StateImageAwesomeStyle" TargetType="fa6:ImageAwesome">
+                    <Setter Property="PrimaryColor" Value="{StaticResource HighlightBrush}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=RadioButton,AncestorLevel=1}, Path=IsChecked}" Value="True">
+                            <Setter Property="PrimaryColor" Value="{StaticResource AccentBrush}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=RadioButton,AncestorLevel=1}, Path=IsMouseOver}" Value="True">
+                            <Setter Property="PrimaryColor" Value="{StaticResource AccentBrush}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Resources>
+            <RadioButton
+                Style="{StaticResource StateRadioButtonStyle}"
+                IsChecked="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static viewModels:MainWindowState.Mods}}">
+                <fa6:ImageAwesome Icon="Regular_File" Style="{StaticResource StateImageAwesomeStyle}" Height="25" Width="25" />
+            </RadioButton>
+            <RadioButton
+                Style="{StaticResource StateRadioButtonStyle}"
+                IsChecked="{Binding State, Converter={StaticResource EnumToBoolConverter}, ConverterParameter={x:Static viewModels:MainWindowState.Profiles}}">
+                <fa6:ImageAwesome Icon="Regular_Folder" Style="{StaticResource StateImageAwesomeStyle}" Height="25" Width="25" />
+            </RadioButton>
+        </StackPanel>
 
-                Text="{Binding FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <resources:WatermarkService.Watermark>
-                    <TextBlock Style="{StaticResource WatermarkStyle}">Filter...</TextBlock>
-                </resources:WatermarkService.Watermark>
-            </TextBox>
-            <Button Grid.Column="4"
-                    Style="{StaticResource ButtonStyle}"
-                    Command="{Binding ClearFilterCommand}">
-                CLEAR
-            </Button>
-        </Grid>
-
-        <!-- MAIN -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="500" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <ListBox Background="Transparent" BorderThickness="0"
-                     ItemsSource="{Binding Mods}"
-                     SelectedItem="{Binding SelectedMod}"
-                     Margin="0 0 7 0">
-                <ListBox.ItemTemplate>
-                    <DataTemplate DataType="{x:Type viewModels:ModViewModel}">
-                        <Grid Height="50">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <ToggleButton Grid.Column="0" Style="{StaticResource ToggleButtonStyle}" IsChecked="{Binding IsEnabled}" />
-                            <TextBlock Grid.Column="1" Foreground="Azure" Text="{Binding Title, Mode=OneTime}" FontSize="20" VerticalAlignment="Center" />
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            
-            <GridSplitter Grid.Column="0" Width="7"></GridSplitter>
-
-            <views:ModView Grid.Column="1" DataContext="{Binding SelectedMod}" />
-        </Grid>
-
-        <!-- FOOTER -->
-        <Grid Grid.Row="3" Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="120" />
-                <ColumnDefinition Width="120" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="120" />
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="0" Command="{Binding LoadCommand}" Style="{StaticResource ButtonStyle}">LOAD</Button>
-            <TextBlock Grid.Column="2" Margin="7 0" HorizontalAlignment="Right" Text="{Binding Counters}" Style="{StaticResource TextBlockStyle}" />
-            <Button Grid.Column="3" Command="{Binding RunCommand}" Style="{StaticResource ButtonStyle}">RUN</Button>
+        <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding State, Converter={StaticResource StateToViewModelConverter}}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type viewModels:ModsViewModel}">
+                    <views:ModsView />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type viewModels:ProfilesViewModel}">
+                    <views:ProfilesView />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+        
+        <!-- MODAL -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2"
+              Background="Black"
+              Visibility="{Binding Modal.Current, Converter={StaticResource NullToVisibilityConverter}}">
+            <modals:ModalControl />
         </Grid>
     </Grid>
 </Window>

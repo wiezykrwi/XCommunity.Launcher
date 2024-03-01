@@ -5,10 +5,10 @@ namespace Xcommunity.Launcher.Gui.ViewModels;
 
 public class ModViewModel : ViewModelBase
 {
-    private readonly MainViewModel _mainViewModel;
+    private readonly ModsViewModel _mainViewModel;
     private bool _isLoadingDetails;
 
-    public ModViewModel(MainViewModel mainViewModel, ModData modData)
+    public ModViewModel(ModsViewModel mainViewModel, ModData modData)
     {
         _mainViewModel = mainViewModel;
         Data = modData;

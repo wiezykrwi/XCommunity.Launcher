@@ -8,7 +8,7 @@ namespace Xcommunity.Launcher.Gui.Services;
 
 public class SteamService
 {
-    public  Task<DetailedModData?> GetModDetails(ulong modId, CancellationToken cancellationToken = default)
+    public Task<DetailedModData?> GetModDetails(ulong modId, CancellationToken cancellationToken = default)
     {
         return Task.Run(() =>
         {
@@ -30,11 +30,8 @@ public class SteamService
                 {
                     SteamApiWrapper.RunCallbacks();
                 } while (!waitHandle.Wait(100));
-                
-                if (!SteamUGC.GetQueryUGCResult(queryHandle, 0, out var result))
-                {
-                    return null;
-                }
+
+                if (!SteamUGC.GetQueryUGCResult(queryHandle, 0, out var result)) return null;
 
                 return new DetailedModData
                 {
@@ -56,12 +53,9 @@ public class SteamService
     private static string GetAuthor(ulong steamId)
     {
         var waitHandle = new ManualResetEvent(false);
-        _ = Callback<PersonaStateChange_t>.Create(delegate
-        {
-            waitHandle.Set();
-        });
+        _ = Callback<PersonaStateChange_t>.Create(delegate { waitHandle.Set(); });
         var success = SteamFriends.RequestUserInformation(new CSteamID(steamId), true);
-            
+
         if (success)
         {
             waitHandle.WaitOne(5000);

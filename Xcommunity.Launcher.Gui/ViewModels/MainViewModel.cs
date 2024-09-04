@@ -15,6 +15,7 @@ public class MainViewModel : ViewModelBase
     public void Save()
     {
         ViewModelLocator.Instance.Mods.Save();
+        ViewModelLocator.Instance.Profiles.Save();
     }
 }
 

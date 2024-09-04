@@ -13,7 +13,7 @@ namespace Xcommunity.Launcher.Gui.ViewModels;
 
 public class ProfilesViewModel : ViewModelBase
 {
-    private List<ProfileViewModel> _allProfiles = [];
+    private readonly List<ProfileViewModel> _allProfiles = [];
 
     public ProfilesViewModel()
     {
@@ -83,5 +83,11 @@ public class ProfilesViewModel : ViewModelBase
         {
             Profiles.Add(profileViewModel);
         }
+    }
+
+    public void Save()
+    {
+        using var fileStream = File.Open("profiles.json", FileMode.Create);
+        JsonSerializer.Serialize(fileStream, _allProfiles.Select(x => new ProfileData { Name = x.Name }));
     }
 }

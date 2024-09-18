@@ -19,6 +19,7 @@ public class ProfilesViewModel : ViewModelBase
     {
         CreateCommand = new AsyncRelayCommand(Create);
         ImportCommand = new RelayCommand(Import);
+        SaveModsCommand = new RelayCommand(SaveMods);
         LoadCommand = new RelayCommand(Load);
         
         if (File.Exists("profiles.json"))
@@ -27,7 +28,7 @@ public class ProfilesViewModel : ViewModelBase
             var profiles = JsonSerializer.Deserialize<ProfileData[]>(fileStream);
             if (profiles != null)
             {
-                _allProfiles.AddRange(profiles.Select(x => new ProfileViewModel(x.Name)));
+                _allProfiles.AddRange(profiles.Select(x => new ProfileViewModel(x.Name, x.Mods)));
             }
         }
         else
@@ -39,7 +40,7 @@ public class ProfilesViewModel : ViewModelBase
 
     private void Load()
     {
-        throw new System.NotImplementedException();
+        ViewModelLocator.Instance.Mods.ToggleMods(SelectedProfile.Mods);
     }
 
     private async Task Create()
@@ -56,11 +57,11 @@ public class ProfilesViewModel : ViewModelBase
     }
     
     public ObservableCollection<ProfileViewModel> Profiles { get; } = [];
+    public ProfileViewModel SelectedProfile { get; set; }
     
     public ICommand CreateCommand { get; }
-
     public ICommand ImportCommand { get; }
-
+    public ICommand SaveModsCommand { get; }
     public ICommand LoadCommand { get; }
 
     private void Import()
@@ -85,9 +86,17 @@ public class ProfilesViewModel : ViewModelBase
         }
     }
 
+    private void SaveMods()
+    {
+        SelectedProfile.Mods = ViewModelLocator.Instance.Mods.AllMods
+            .Where(x => x.IsEnabled)
+            .Select(x => x.Data.Id)
+            .ToArray();
+    }
+
     public void Save()
     {
         using var fileStream = File.Open("profiles.json", FileMode.Create);
-        JsonSerializer.Serialize(fileStream, _allProfiles.Select(x => new ProfileData { Name = x.Name }));
+        JsonSerializer.Serialize(fileStream, _allProfiles.Select(x => new ProfileData { Name = x.Name, Mods = x.Mods }));
     }
 }

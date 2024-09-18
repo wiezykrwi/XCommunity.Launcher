@@ -5,12 +5,10 @@ namespace Xcommunity.Launcher.Gui.ViewModels;
 
 public class ModViewModel : ViewModelBase
 {
-    private readonly ModsViewModel _mainViewModel;
     private bool _isLoadingDetails;
 
-    public ModViewModel(ModsViewModel mainViewModel, ModData modData)
+    public ModViewModel(ModData modData)
     {
-        _mainViewModel = mainViewModel;
         Data = modData;
 
         IsEnabled = Data.IsEnabled;
@@ -24,7 +22,7 @@ public class ModViewModel : ViewModelBase
             if (Data.IsEnabled == value) return;
             Data.IsEnabled = value;
             OnPropertyChanged();
-            _mainViewModel.NotifyEnabledChanged();
+            ViewModelLocator.Instance.Mods.NotifyEnabledChanged();
         }
     }
 
@@ -42,7 +40,7 @@ public class ModViewModel : ViewModelBase
             OnPropertyChanged();
         }
     }
-
+    
     public void SetDetails(DetailedModData detailedModData)
     {
         if (detailedModData.Name != Data.Title)

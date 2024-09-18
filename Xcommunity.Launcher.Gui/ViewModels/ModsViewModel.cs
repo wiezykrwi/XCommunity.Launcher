@@ -14,8 +14,9 @@ namespace Xcommunity.Launcher.Gui.ViewModels;
 
 public class ModsViewModel : ViewModelBase
 {
-    private readonly List<ModViewModel> _allMods = new();
+    private readonly List<ModViewModel> _allMods = [];
     private readonly SteamService _steamService = new();
+    
     private string _filterText = string.Empty;
     private ModViewModel? _selectedMod;
 
@@ -26,19 +27,17 @@ public class ModsViewModel : ViewModelBase
         ToggleAllCommand = new RelayCommand(ToggleAll);
         ClearFilterCommand = new RelayCommand(ClearFilter);
 
-        if (File.Exists("data.json"))
-        {
-            using var fileStream = File.Open("data.json", FileMode.Open);
-            var mods = JsonSerializer.Deserialize<ModData[]>(fileStream);
-            if (mods != null)
-            {
-                _allMods.AddRange(mods.Select(x => new ModViewModel(this, x)));
-                Filter();
-            }
-        }
+        if (!File.Exists("data.json")) return;
+        using var fileStream = File.Open("data.json", FileMode.Open);
+        var mods = JsonSerializer.Deserialize<ModData[]>(fileStream);
+        if (mods == null) return;
+        _allMods.AddRange(mods.Select(x => new ModViewModel(x)));
+        Filter();
     } 
     
     public ObservableCollection<ModViewModel> Mods { get; } = new();
+    
+    public IReadOnlyCollection<ModViewModel> AllMods => _allMods;
 
     public ICommand LoadCommand { get; }
     public ICommand ToggleAllCommand { get; }
@@ -121,7 +120,7 @@ public class ModsViewModel : ViewModelBase
         var mods = await modFinder.FindModsAsync();
 
         _allMods.Clear();
-        foreach (var mod in mods) _allMods.Add(new ModViewModel(this, mod));
+        foreach (var mod in mods) _allMods.Add(new ModViewModel(mod));
         Filter();
     }
     
@@ -129,5 +128,13 @@ public class ModsViewModel : ViewModelBase
     {
         using var fileStream = File.Open("data.json", FileMode.Create);
         JsonSerializer.Serialize(fileStream, _allMods.Select(x => x.Data));
+    }
+
+    public void ToggleMods(ulong[] mods)
+    {
+        foreach (var mod in _allMods)
+        {
+            mod.IsEnabled = mods.Contains(mod.Data.Id);
+        }
     }
 }
